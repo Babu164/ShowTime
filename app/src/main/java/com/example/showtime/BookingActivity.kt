@@ -25,6 +25,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.showtime.ui.theme.ShowTimeTheme
+import androidx.compose.foundation.layout.FlowRow
+
 
 class BookingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,14 +68,19 @@ fun BookingScreen() {
 
         Spacer(Modifier.height(16.dp))
 
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(bottom = 80.dp) // gives breathing space
+        ) {
             items(movies) { movie ->
                 MovieCard(movie)
             }
         }
-    }
-}
 
+    }
+    }
+
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MovieCard(movie: Movie) {
     val context = LocalContext.current
@@ -83,35 +90,49 @@ fun MovieCard(movie: Movie) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp)),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(12.dp)) {
             Image(
                 painter = painterResource(id = movie.posterResId),
                 contentDescription = "${movie.title} Poster",
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp),
-                contentScale = ContentScale.Crop
+                    .fillMaxWidth()                    // take full card width
+                    .height(220.dp)                   // increase height for better view
+                    .clip(RoundedCornerShape(8.dp)),  // subtle rounded corners
+                contentScale = ContentScale.Crop      // crop nicely to fill space
             )
-            Spacer(Modifier.height(8.dp))
-            Text(movie.title, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.Black)
 
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+
+            Spacer(Modifier.height(10.dp))
+
+            Text(
+                text = movie.title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                color = Color.Black
+            )
+
+            Spacer(Modifier.height(10.dp))
+
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 movie.showTimes.forEach { time ->
                     AssistChip(
                         onClick = {
                             Toast.makeText(context, "Selected $time for ${movie.title}", Toast.LENGTH_SHORT).show()
                         },
-                        label = {
-                            Text(text = time)
-                        }
+                        label = { Text(text = time) }
                     )
                 }
             }
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable
