@@ -173,7 +173,8 @@ fun LoginScreen(navController: NavHostController) {
                                 isLoading = false
                                 if (task.isSuccessful) {
                                     Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
-                                    // Navigate to home or dashboard
+                                    val intent = Intent(context, BookingActivity::class.java)
+                                    context.startActivity(intent)
                                 } else {
                                     errorMessage = task.exception?.message ?: "Login failed"
                                 }
@@ -184,7 +185,8 @@ fun LoginScreen(navController: NavHostController) {
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (isLoading) Color.Gray else Color(0xFFD4AF37)
                     )
-                ) {
+                )
+                {
                     if (isLoading) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
