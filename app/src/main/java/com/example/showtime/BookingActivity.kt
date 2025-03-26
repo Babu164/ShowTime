@@ -64,21 +64,25 @@ fun BookingScreen() {
             .background(Color.White)
             .padding(16.dp)
     ) {
-        Text("Now Showing", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color(0xFFD4AF37))
+        Spacer(modifier = Modifier.height(24.dp)) // Add spacing from top
+
+        Text(
+            "Now Showing",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFFD4AF37)
+        )
 
         Spacer(Modifier.height(16.dp))
 
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(bottom = 80.dp) // gives breathing space
-        ) {
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             items(movies) { movie ->
                 MovieCard(movie)
             }
         }
+    }
 
-    }
-    }
+}
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
