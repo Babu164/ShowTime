@@ -1,6 +1,6 @@
 package com.example.showtime;
 
-import android.content.Intent
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 import androidx.activity.ComponentActivity;
@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp;
 import androidx.navigation.NavHostController;
 import androidx.navigation.compose.rememberNavController;
 import com.example.showtime.ui.theme.ShowTimeTheme;
+import com.google.firebase.auth.FirebaseAuth;
 
 class SignupActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,6 +45,8 @@ class SignupActivity : ComponentActivity() {
 @Composable
 fun SignupScreen(navController: NavHostController) {
     val context = LocalContext.current
+    val auth = FirebaseAuth.getInstance()
+
 
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -62,7 +65,6 @@ fun SignupScreen(navController: NavHostController) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Background Image
         Image(
             painter = painterResource(id = R.drawable.background4),
             contentDescription = null,
@@ -70,7 +72,6 @@ fun SignupScreen(navController: NavHostController) {
             contentScale = ContentScale.Crop
         )
 
-        // Light overlay for visibility
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -82,9 +83,8 @@ fun SignupScreen(navController: NavHostController) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Logo Instead of Text
             Image(
-                painter = painterResource(id = R.drawable.background8), // Replace with actual logo resource
+                painter = painterResource(id = R.drawable.background8),
                 contentDescription = "ShowTime Logo",
                 modifier = Modifier
                     .size(200.dp)
@@ -164,7 +164,18 @@ fun SignupScreen(navController: NavHostController) {
                 Button(
                     onClick = {
                         isLoading = true
-                        Toast.makeText(context, "Signup Successful!", Toast.LENGTH_SHORT).show()
+                        errorMessage = null
+                        auth.createUserWithEmailAndPassword(email, password)
+                            .addOnCompleteListener { task ->
+                                isLoading = false
+                                if (task.isSuccessful) {
+                                    Toast.makeText(context, "Signup Successful!", Toast.LENGTH_SHORT).show()
+                                    val intent = Intent(context, LoginActivity::class.java)
+                                    context.startActivity(intent)
+                                } else {
+                                    errorMessage = task.exception?.message ?: "Signup failed"
+                                }
+                            }
                     },
                     enabled = isFormValid && !isLoading,
                     modifier = Modifier
@@ -179,6 +190,11 @@ fun SignupScreen(navController: NavHostController) {
                     }
                 }
 
+                errorMessage?.let {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(it, color = Color.Red, fontSize = 14.sp)
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
@@ -191,7 +207,6 @@ fun SignupScreen(navController: NavHostController) {
                         context.startActivity(intent)
                     }
                 )
-
             }
         }
     }

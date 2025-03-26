@@ -1,6 +1,6 @@
 package com.example.showtime
 
-
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -25,7 +25,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,9 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.showtime.ui.theme.ShowTimeTheme
-import android.content.Intent
-
-import kotlinx.coroutines.delay
+import com.google.firebase.auth.FirebaseAuth
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,8 +49,8 @@ class LoginActivity : ComponentActivity() {
 @Composable
 fun LoginScreen(navController: NavHostController) {
     val context = LocalContext.current
+    val auth = FirebaseAuth.getInstance()
 
-    // State Variables
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
@@ -65,10 +62,7 @@ fun LoginScreen(navController: NavHostController) {
     val isPasswordValid = password.length >= 6
     val isFormValid = isEmailValid && isPasswordValid
 
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // Background Image
+    Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(id = R.drawable.background4),
             contentDescription = null,
@@ -76,22 +70,19 @@ fun LoginScreen(navController: NavHostController) {
             contentScale = ContentScale.Crop
         )
 
-        // Column to Center Everything
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Logo Instead of Text
             Image(
-                painter = painterResource(id = R.drawable.background8), // Replace with actual logo resource
+                painter = painterResource(id = R.drawable.background8),
                 contentDescription = "ShowTime Logo",
                 modifier = Modifier
-                    .size(150.dp) // Adjust size as needed
+                    .size(150.dp)
                     .padding(bottom = 16.dp)
             )
 
-            // Centered Login Box
             Column(
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
@@ -109,16 +100,13 @@ fun LoginScreen(navController: NavHostController) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Email Field
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
                     label = { Text("Email Address") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Email
-                    ),
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
                     isError = email.isNotEmpty() && !isEmailValid
                 )
                 if (email.isNotEmpty() && !isEmailValid) {
@@ -127,7 +115,6 @@ fun LoginScreen(navController: NavHostController) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Password Field
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
@@ -151,15 +138,12 @@ fun LoginScreen(navController: NavHostController) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Remember Me and Forgot Password Row
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(
                             checked = rememberMe,
                             onCheckedChange = { rememberMe = it }
@@ -179,11 +163,21 @@ fun LoginScreen(navController: NavHostController) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Login Button
                 Button(
                     onClick = {
                         isLoading = true
                         errorMessage = null
+
+                        auth.signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener { task ->
+                                isLoading = false
+                                if (task.isSuccessful) {
+                                    Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
+                                    // Navigate to home or dashboard
+                                } else {
+                                    errorMessage = task.exception?.message ?: "Login failed"
+                                }
+                            }
                     },
                     enabled = isFormValid && !isLoading,
                     modifier = Modifier.fillMaxWidth(),
@@ -201,9 +195,13 @@ fun LoginScreen(navController: NavHostController) {
                     }
                 }
 
+                errorMessage?.let {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(it, color = Color.Red, fontSize = 14.sp)
+                }
+
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Sign Up Button
                 Text(
                     "Don't have an account? Sign up",
                     fontSize = 14.sp,
