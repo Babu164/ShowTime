@@ -43,6 +43,11 @@
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.ShowTime"/>
+        <activity
+            android:name=".PaymentActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.ShowTime"/>
     </application>
 
 </manifest>
