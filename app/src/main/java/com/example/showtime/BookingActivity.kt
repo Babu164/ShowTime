@@ -1,5 +1,6 @@
 package com.example.showtime
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -50,6 +51,8 @@ data class Movie(
 @Composable
 fun BookingScreen() {
     val context = LocalContext.current
+    var selectedTab by remember { mutableStateOf(0) }
+
     val movies = remember {
         listOf(
             Movie("RRR", R.drawable.rrr, listOf("Screen 2 - 10:00 AM", "Screen 1 - 1:00 PM", "Screen 3 - 5:30 PM")),
@@ -59,8 +62,6 @@ fun BookingScreen() {
             Movie("Dune Part 2", R.drawable.dune2, listOf("Screen 2 - 9:00 AM", "Screen 1 - 12:00 PM", "Screen 3 - 4:00 PM"))
         )
     }
-
-    var selectedTab by remember { mutableStateOf(0) }
 
     Scaffold(
         bottomBar = {
@@ -73,13 +74,20 @@ fun BookingScreen() {
                 )
                 NavigationBarItem(
                     selected = selectedTab == 1,
-                    onClick = { selectedTab = 1 },
+                    onClick = {
+                        selectedTab = 1
+                        val intent = Intent(context, SeatActivity::class.java)
+                        context.startActivity(intent)
+                    },
                     icon = { Icon(Icons.Default.EventSeat, contentDescription = "Seat") },
                     label = { Text("Seat") }
                 )
                 NavigationBarItem(
                     selected = selectedTab == 2,
-                    onClick = { selectedTab = 2 },
+                    onClick = {
+                        selectedTab = 2
+                        Toast.makeText(context, "Payment page coming soon", Toast.LENGTH_SHORT).show()
+                    },
                     icon = { Icon(Icons.Default.Payment, contentDescription = "Payment") },
                     label = { Text("Payment") }
                 )
@@ -111,6 +119,7 @@ fun BookingScreen() {
         }
     }
 }
+
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
