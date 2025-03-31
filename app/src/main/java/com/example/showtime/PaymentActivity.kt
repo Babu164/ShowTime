@@ -1,5 +1,6 @@
 package com.example.showtime
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -173,7 +174,11 @@ fun PaymentScreen(movieTitle: String, showTime: String, selectedSeats: List<Stri
                         Button(
                             onClick = {
                                 showDialog = false
-                                Toast.makeText(context, "Redirecting to home...", Toast.LENGTH_SHORT).show()
+                                val intent = Intent(context, BookingActivity::class.java)
+                                context.startActivity(intent)
+                                if (context is ComponentActivity) {
+                                    context.finish()
+                                }
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD4AF37))
                         ) {
@@ -183,5 +188,6 @@ fun PaymentScreen(movieTitle: String, showTime: String, selectedSeats: List<Stri
                 }
             }
         }
+
     }
 }
