@@ -1,5 +1,6 @@
 package com.example.showtime
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -17,11 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import com.example.showtime.ui.theme.ShowTimeTheme
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.systemBars
 
 class SeatActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,25 +41,19 @@ fun SeatSelectionScreen(movieTitle: String, showTime: String) {
     val rows = 5
     val columns = 6
     val selectedSeats = remember { mutableStateListOf<String>() }
-    var showDialog by remember { mutableStateOf(false) }
 
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFFFF8E1)),
         containerColor = Color(0xFFFFF8E1)
-    ) { paddingValues ->
-
+    ) { padding ->
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(padding)
+                .padding(horizontal = 16.dp, vertical = 32.dp)
+                .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Movie Title and Showtime
             Text(
-                "$movieTitle - $showTime",
+                text = "$movieTitle - $showTime",
                 fontSize = 20.sp,
                 color = Color.Black
             )
@@ -77,7 +68,7 @@ fun SeatSelectionScreen(movieTitle: String, showTime: String) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Seat Grid
+            // Seat grid
             for (i in 1..rows) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -103,18 +94,14 @@ fun SeatSelectionScreen(movieTitle: String, showTime: String) {
                                             selectedSeats.add(seatNumber)
                                         } else {
                                             Toast
-                                                .makeText(
-                                                    context,
-                                                    "Max 3 seats allowed!",
-                                                    Toast.LENGTH_SHORT
-                                                )
+                                                .makeText(context, "Max 3 seats allowed!", Toast.LENGTH_SHORT)
                                                 .show()
                                         }
                                     }
                                 },
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(seatNumber, fontSize = 12.sp, color = Color.Black)
+                            Text(text = seatNumber, fontSize = 12.sp, color = Color.Black)
                         }
                     }
                 }
@@ -123,7 +110,6 @@ fun SeatSelectionScreen(movieTitle: String, showTime: String) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Selected Seat Info and Book Button
             if (selectedSeats.isNotEmpty()) {
                 Text(
                     "Selected Seats: ${selectedSeats.joinToString()}",
@@ -134,39 +120,16 @@ fun SeatSelectionScreen(movieTitle: String, showTime: String) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
-                    onClick = { showDialog = true },
+                    onClick = {
+                        val intent = Intent(context, PaymentActivity::class.java)
+                        intent.putExtra("movieTitle", movieTitle)
+                        intent.putExtra("showTime", showTime)
+                        intent.putStringArrayListExtra("selectedSeats", ArrayList(selectedSeats))
+                        context.startActivity(intent)
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD4AF37))
                 ) {
                     Text("Book Tickets")
-                }
-            }
-        }
-
-        // Booking Confirmation Dialog
-        if (showDialog) {
-            Dialog(onDismissRequest = { showDialog = false }) {
-                Surface(
-                    shape = MaterialTheme.shapes.medium,
-                    color = Color.White,
-                    tonalElevation = 8.dp
-                ) {
-                    Column(
-                        modifier = Modifier.padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text("Booking Confirmed!", fontSize = 20.sp, color = Color.Black)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("Movie: $movieTitle", fontSize = 16.sp)
-                        Text("Showtime: $showTime", fontSize = 16.sp)
-                        Text("Seats: ${selectedSeats.joinToString()}", fontSize = 16.sp)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(
-                            onClick = { showDialog = false },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD4AF37))
-                        ) {
-                            Text("OK")
-                        }
-                    }
                 }
             }
         }

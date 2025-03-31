@@ -3,10 +3,13 @@ package com.example.showtime
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,9 +38,11 @@ class PaymentActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentScreen(movieTitle: String, showTime: String, selectedSeats: List<String>) {
     val context = LocalContext.current
+    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     val pricePerSeat = 200
     val totalPrice = selectedSeats.size * pricePerSeat
     var showDialog by remember { mutableStateOf(false) }
@@ -47,9 +52,26 @@ fun PaymentScreen(movieTitle: String, showTime: String, selectedSeats: List<Stri
     var expiryDate by remember { mutableStateOf("") }
     var cvv by remember { mutableStateOf("") }
 
+    // Validation Rules
+    val isCardNumberValid = cardNumber.length == 16 && cardNumber.all { it.isDigit() }
+    val isCardHolderValid = cardHolder.length >= 3 && cardHolder.all { it.isLetter() || it.isWhitespace() }
+    val isExpiryValid = expiryDate.matches(Regex("^(0[1-9]|1[0-2])/\\d{2}$"))
+    val isCvvValid = cvv.length == 3 && cvv.all { it.isDigit() }
+    val isFormValid = isCardNumberValid && isCardHolderValid && isExpiryValid && isCvvValid
+
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = Color(0xFFFFF8E1)
+        containerColor = Color(0xFFFFF8E1),
+        topBar = {
+            TopAppBar(
+                title = { Text("Payment", color = Color(0xFFD4AF37), fontSize = 20.sp) },
+                navigationIcon = {
+                    IconButton(onClick = { backDispatcher?.onBackPressed() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color(0xFFD4AF37))
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+            )
+        }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -58,8 +80,6 @@ fun PaymentScreen(movieTitle: String, showTime: String, selectedSeats: List<Stri
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("Payment", fontSize = 26.sp, color = Color(0xFFD4AF37))
-
             Text("Movie: $movieTitle", fontSize = 16.sp)
             Text("Showtime: $showTime", fontSize = 16.sp)
             Text("Seats: ${selectedSeats.joinToString()}", fontSize = 16.sp)
@@ -67,61 +87,74 @@ fun PaymentScreen(movieTitle: String, showTime: String, selectedSeats: List<Stri
 
             Divider(thickness = 1.dp)
 
-            // Card details input
             OutlinedTextField(
                 value = cardHolder,
                 onValueChange = { cardHolder = it },
                 label = { Text("Card Holder Name") },
+                isError = cardHolder.isNotEmpty() && !isCardHolderValid,
                 modifier = Modifier.fillMaxWidth()
             )
+            if (cardHolder.isNotEmpty() && !isCardHolderValid) {
+                Text("Name should be at least 3 letters", color = Color.Red, fontSize = 12.sp)
+            }
 
             OutlinedTextField(
                 value = cardNumber,
-                onValueChange = { cardNumber = it },
+                onValueChange = { cardNumber = it.take(16) },
                 label = { Text("Card Number") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+                isError = cardNumber.isNotEmpty() && !isCardNumberValid,
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth()
             )
+            if (cardNumber.isNotEmpty() && !isCardNumberValid) {
+                Text("Card number must be 16 digits", color = Color.Red, fontSize = 12.sp)
+            }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            Row(modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
                     value = expiryDate,
-                    onValueChange = { expiryDate = it },
+                    onValueChange = { expiryDate = it.take(5) },
                     label = { Text("Expiry MM/YY") },
+                    isError = expiryDate.isNotEmpty() && !isExpiryValid,
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 OutlinedTextField(
                     value = cvv,
-                    onValueChange = { cvv = it },
+                    onValueChange = { cvv = it.take(3) },
                     label = { Text("CVV") },
-                    modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+                    isError = cvv.isNotEmpty() && !isCvvValid,
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.weight(1f)
                 )
+            }
+
+            if (expiryDate.isNotEmpty() && !isExpiryValid) {
+                Text("Format should be MM/YY", color = Color.Red, fontSize = 12.sp)
+            }
+            if (cvv.isNotEmpty() && !isCvvValid) {
+                Text("CVV must be 3 digits", color = Color.Red, fontSize = 12.sp)
             }
 
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(
                 onClick = {
-                    // Add validation if needed
-                    if (cardNumber.isNotEmpty() && cvv.isNotEmpty()) {
+                    if (isFormValid) {
                         showDialog = true
                     } else {
-                        Toast.makeText(context, "Please fill in all details", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Please fix form errors", Toast.LENGTH_SHORT).show()
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD4AF37)),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = isFormValid
             ) {
                 Text("Pay ₹$totalPrice", fontSize = 16.sp)
             }
         }
 
-        // Confirmation Dialog
         if (showDialog) {
             Dialog(onDismissRequest = { showDialog = false }) {
                 Surface(
@@ -135,7 +168,7 @@ fun PaymentScreen(movieTitle: String, showTime: String, selectedSeats: List<Stri
                     ) {
                         Text("Booking Confirmed!", fontSize = 20.sp, color = Color.Black)
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Your ticket will be sent to your registered email.")
+                        Text("Your ticket will be sent to your registered email.", fontSize = 14.sp)
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = {
