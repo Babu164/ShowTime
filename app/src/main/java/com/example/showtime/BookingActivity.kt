@@ -10,9 +10,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Payment
+import androidx.compose.material.icons.filled.EventSeat
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,12 +24,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.showtime.ui.theme.ShowTimeTheme
 import androidx.compose.foundation.layout.FlowRow
-
+import androidx.compose.ui.tooling.preview.Preview
 
 class BookingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,30 +60,56 @@ fun BookingScreen() {
         )
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(16.dp)
-    ) {
-        Spacer(modifier = Modifier.height(24.dp)) // Add spacing from top
+    var selectedTab by remember { mutableStateOf(0) }
 
-        Text(
-            "Now Showing",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFFD4AF37)
-        )
+    Scaffold(
+        bottomBar = {
+            NavigationBar(containerColor = Color.White) {
+                NavigationBarItem(
+                    selected = selectedTab == 0,
+                    onClick = { selectedTab = 0 },
+                    icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+                    label = { Text("Home") }
+                )
+                NavigationBarItem(
+                    selected = selectedTab == 1,
+                    onClick = { selectedTab = 1 },
+                    icon = { Icon(Icons.Default.EventSeat, contentDescription = "Seat") },
+                    label = { Text("Seat") }
+                )
+                NavigationBarItem(
+                    selected = selectedTab == 2,
+                    onClick = { selectedTab = 2 },
+                    icon = { Icon(Icons.Default.Payment, contentDescription = "Payment") },
+                    label = { Text("Payment") }
+                )
+            }
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(horizontal = 16.dp)
+        ) {
+            Spacer(modifier = Modifier.height(32.dp))
+            Text(
+                "Now Showing",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFFD4AF37)
+            )
 
-        Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            items(movies) { movie ->
-                MovieCard(movie)
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                items(movies) { movie ->
+                    MovieCard(movie)
+                }
             }
         }
     }
-
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -101,12 +129,11 @@ fun MovieCard(movie: Movie) {
                 painter = painterResource(id = movie.posterResId),
                 contentDescription = "${movie.title} Poster",
                 modifier = Modifier
-                    .fillMaxWidth()                    // take full card width
-                    .height(220.dp)                   // increase height for better view
-                    .clip(RoundedCornerShape(8.dp)),  // subtle rounded corners
-                contentScale = ContentScale.Crop      // crop nicely to fill space
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
             )
-
 
             Spacer(Modifier.height(10.dp))
 
@@ -136,7 +163,6 @@ fun MovieCard(movie: Movie) {
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable
