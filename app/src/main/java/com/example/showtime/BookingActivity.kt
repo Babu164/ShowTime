@@ -163,7 +163,12 @@ fun MovieCard(movie: Movie) {
                 movie.showTimes.forEach { time ->
                     AssistChip(
                         onClick = {
-                            Toast.makeText(context, "Selected $time for ${movie.title}", Toast.LENGTH_SHORT).show()
+                            val intent = Intent(context, SeatActivity::class.java).apply {
+                                putExtra("movieTitle", movie.title)
+                                putExtra("showTime", time)
+                            }
+                            context.startActivity(intent)
+
                         },
                         label = { Text(text = time) }
                     )

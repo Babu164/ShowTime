@@ -1,7 +1,7 @@
 package com.example.showtime
 
+import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -22,16 +22,20 @@ import com.example.showtime.ui.theme.ShowTimeTheme
 class SeatActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val movieTitle = intent.getStringExtra("movieTitle") ?: "Movie"
+        val showTime = intent.getStringExtra("showTime") ?: "Showtime"
+
         setContent {
             ShowTimeTheme {
-                SeatSelectionScreen()
+                SeatSelectionScreen(movieTitle, showTime)
             }
         }
     }
 }
 
 @Composable
-fun SeatSelectionScreen() {
+fun SeatSelectionScreen(movieTitle: String, showTime: String) {
     val rows = 5
     val columns = 6
     val selectedSeats = remember { mutableStateListOf<String>() }
@@ -43,6 +47,10 @@ fun SeatSelectionScreen() {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Movie Title and ShowTime
+        Text("$movieTitle - $showTime", fontSize = 20.sp, color = Color.Black)
+        Spacer(modifier = Modifier.height(16.dp))
+
         Text("Select Your Seats", fontSize = 24.sp, color = Color(0xFFD4AF37))
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -57,7 +65,7 @@ fun SeatSelectionScreen() {
                     val isSelected = selectedSeats.contains(seatNumber)
                     Box(
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(42.dp)
                             .background(
                                 if (isSelected) Color(0xFFD4AF37) else Color.LightGray,
                                 shape = CircleShape
@@ -78,9 +86,10 @@ fun SeatSelectionScreen() {
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Selected Seat Info and Button
         if (selectedSeats.isNotEmpty()) {
             Text(
-                "Selected: ${selectedSeats.joinToString()}",
+                "Selected Seats: ${selectedSeats.joinToString()}",
                 fontSize = 16.sp,
                 color = Color.Black
             )
@@ -96,6 +105,7 @@ fun SeatSelectionScreen() {
         }
     }
 
+    // Dialog after booking
     if (showDialog) {
         Dialog(onDismissRequest = { showDialog = false }) {
             Surface(
@@ -109,9 +119,20 @@ fun SeatSelectionScreen() {
                 ) {
                     Text("Booking Confirmed!", fontSize = 20.sp, color = Color.Black)
                     Spacer(modifier = Modifier.height(8.dp))
+                    Text("Movie: $movieTitle", fontSize = 16.sp)
+                    Text("Showtime: $showTime", fontSize = 16.sp)
                     Text("Seats: ${selectedSeats.joinToString()}", fontSize = 16.sp)
                     Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = { showDialog = false }) {
+                    Button(
+                        onClick = {
+                            showDialog = false
+                            // Navigate to Payment page (optional)
+                            // val context = LocalContext.current
+                            // val intent = Intent(context, PaymentActivity::class.java)
+                            // context.startActivity(intent)
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD4AF37))
+                    ) {
                         Text("OK")
                     }
                 }
