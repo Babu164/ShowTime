@@ -40,10 +40,50 @@ class LoginActivity : ComponentActivity() {
         setContent {
             ShowTimeTheme {
                 val navController = rememberNavController()
-                LoginScreen(navController)
+                GDPRConsentWrapper(navController)
             }
         }
     }
+}
+
+@Composable
+fun GDPRConsentWrapper(navController: NavHostController) {
+    var accepted by remember { mutableStateOf(false) }
+
+    if (!accepted) {
+        GDPRConsentPopup(onAccept = { accepted = true })
+    } else {
+        LoginScreen(navController)
+    }
+}
+
+@Composable
+fun GDPRConsentPopup(onAccept: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = {},
+        title = {
+            Text(
+                "Privacy & GDPR Consent",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+            )
+        },
+        text = {
+            Text(
+                "We value your privacy. By clicking Accept, you agree to our Privacy Policy and GDPR compliance practices. We securely store and protect your personal data, and it will not be shared with unauthorized parties.",
+                fontSize = 16.sp
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = { onAccept() },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD4AF37))
+            ) {
+                Text("Accept")
+            }
+        },
+        containerColor = Color.White
+    )
 }
 
 @Composable

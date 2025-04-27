@@ -10,6 +10,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,6 +37,7 @@ class SeatActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SeatSelectionScreen(movieTitle: String, showTime: String) {
     val context = LocalContext.current
@@ -43,12 +46,26 @@ fun SeatSelectionScreen(movieTitle: String, showTime: String) {
     val selectedSeats = remember { mutableStateListOf<String>() }
 
     Scaffold(
-        containerColor = Color(0xFFFFF8E1)
+        containerColor = Color(0xFFFFF8E1),
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "Select Seats", color = Color(0xFFD4AF37)) },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        val intent = Intent(context, BookingActivity::class.java)
+                        context.startActivity(intent)
+                    }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color(0xFFD4AF37))
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+            )
+        }
     ) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
-                .padding(horizontal = 16.dp, vertical = 32.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp)
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -93,9 +110,7 @@ fun SeatSelectionScreen(movieTitle: String, showTime: String) {
                                         if (selectedSeats.size < 3) {
                                             selectedSeats.add(seatNumber)
                                         } else {
-                                            Toast
-                                                .makeText(context, "Max 3 seats allowed!", Toast.LENGTH_SHORT)
-                                                .show()
+                                            Toast.makeText(context, "Max 3 seats allowed!", Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                 },
