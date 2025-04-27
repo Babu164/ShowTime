@@ -1,14 +1,10 @@
 package com.example.showtime
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -19,11 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import com.example.showtime.ui.theme.ShowTimeTheme
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -32,47 +26,8 @@ class ProfileActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             ShowTimeTheme {
-                RequestLocationPermissionAndProfile()
+                ProfileScreen()
             }
-        }
-    }
-}
-
-@Composable
-fun RequestLocationPermissionAndProfile() {
-    val context = LocalContext.current
-    var permissionGranted by remember { mutableStateOf(false) }
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        permissionGranted = isGranted
-        if (!isGranted) {
-            Toast.makeText(context, "Location permission is needed to access profile.", Toast.LENGTH_LONG).show()
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        val permissionCheck = ContextCompat.checkSelfPermission(
-            context, Manifest.permission.ACCESS_FINE_LOCATION
-        )
-        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
-            permissionGranted = true
-        } else {
-            launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
-    }
-
-    if (permissionGranted) {
-        ProfileScreen()
-    } else {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("Waiting for location permission...", color = Color.Black)
         }
     }
 }
@@ -88,7 +43,7 @@ fun ProfileScreen() {
     var address by remember { mutableStateOf("") }
     var showPrivacyDialog by remember { mutableStateOf(false) }
 
-    // Load user profile data from Firestore when screen opens
+    // Load user profile data when the screen opens
     LaunchedEffect(Unit) {
         db.collection("users").document("profile")
             .get()
@@ -189,9 +144,8 @@ fun ProfileScreen() {
                     title = { Text("Privacy Policy", fontWeight = FontWeight.Bold, fontSize = 20.sp) },
                     text = {
                         Text(
-                            text = "Your privacy is our top priority. All your personal information, including your name, email, and address, is stored securely. " +
-                                    "We strictly adhere to industry standards to safeguard your data and never share your details with unauthorized parties. " +
-                                    "By using our app, you agree to our commitment to data protection and confidentiality.",
+                            text = "Your privacy is our top priority. Your name, email, and address are securely stored. " +
+                                    "We strictly adhere to industry standards to safeguard your data and never share your details without consent.",
                             fontSize = 16.sp
                         )
                     },

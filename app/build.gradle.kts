@@ -43,33 +43,80 @@ android {
 
 dependencies {
 
+    // -------------------- Firebase Dependencies --------------------
+
+    // Firebase BOM (Bill of Materials) to manage Firebase library versions
     implementation(platform(libs.firebase.bom))
+
+    // Firebase Analytics - for event tracking and user analytics
     implementation(libs.firebase.analytics)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
 
+    // Firebase Authentication (Kotlin Extensions)
+    implementation(libs.firebase.auth.ktx)
 
-    implementation(libs.androidx.material.icons.extended)
-    implementation (libs.firebase.auth.ktx)
+    // Firebase Firestore (Kotlin Extensions) - NoSQL cloud database
+    implementation(libs.firebase.firestore.ktx)
 
+    // Firebase Cloud Storage (Kotlin Extensions) - file storage
+    implementation(libs.firebase.storage.ktx)
 
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
-    implementation(libs.androidx.navigation.compose)
-
-    implementation (libs.firebase.firestore.ktx)
-    implementation (libs.firebase.storage.ktx)
+    // Google Firebase Authentication (alternate package)
     implementation(libs.google.firebase.auth.ktx)
 
+    // -------------------- Jetpack Compose & AndroidX --------------------
+
+    // Core KTX - Kotlin extensions for Android core libraries
+    implementation(libs.androidx.core.ktx)
+
+    // Lifecycle management for Compose (lifecycle-aware components)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+
+    // Compose support inside activities
+    implementation(libs.androidx.activity.compose)
+
+    // Compose BOM to manage all Compose versions
+    implementation(platform(libs.androidx.compose.bom))
+
+    // Jetpack Compose UI framework
+    implementation(libs.androidx.ui)
+
+    // Compose graphics support
+    implementation(libs.androidx.ui.graphics)
+
+    // Compose UI tooling for preview
+    implementation(libs.androidx.ui.tooling.preview)
+
+    // Material Design 3 components for Compose
+    implementation(libs.androidx.material3)
+
+    // Extended Material Icons for Compose
+    implementation(libs.androidx.material.icons.extended)
+
+    // Jetpack Compose Navigation component
+    implementation(libs.androidx.navigation.compose)
+
+    // -------------------- Testing Dependencies --------------------
+
+    // JUnit for unit testing
+    testImplementation(libs.junit)
+
+    // AndroidX Test - JUnit integration for Android tests
+    androidTestImplementation(libs.androidx.junit)
+
+    // Espresso - Android UI testing framework
+    androidTestImplementation(libs.androidx.espresso.core)
+
+    // Compose BOM for UI testing consistency
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+
+    // Jetpack Compose UI testing with JUnit4
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+
+    // -------------------- Debugging Dependencies --------------------
+
+    // Compose UI tooling for design-time preview and inspection
+    debugImplementation(libs.androidx.ui.tooling)
+
+    // Compose Test Manifest for managing testing environments
+    debugImplementation(libs.androidx.ui.test.manifest)
 }

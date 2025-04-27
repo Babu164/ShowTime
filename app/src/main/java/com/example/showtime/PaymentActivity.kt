@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.showtime.ui.theme.ShowTimeTheme
+import com.google.firebase.firestore.FirebaseFirestore
 
 class PaymentActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,6 +44,7 @@ class PaymentActivity : ComponentActivity() {
 @Composable
 fun PaymentScreen(movieTitle: String, showTime: String, selectedSeats: List<String>) {
     val context = LocalContext.current
+    val db = FirebaseFirestore.getInstance()
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     val pricePerSeat = 200
     val totalPrice = selectedSeats.size * pricePerSeat
@@ -53,7 +55,6 @@ fun PaymentScreen(movieTitle: String, showTime: String, selectedSeats: List<Stri
     var expiryDate by remember { mutableStateOf("") }
     var cvv by remember { mutableStateOf("") }
 
-    // Validation Rules
     val isCardNumberValid = cardNumber.length == 16 && cardNumber.all { it.isDigit() }
     val isCardHolderValid = cardHolder.length >= 3 && cardHolder.all { it.isLetter() || it.isWhitespace() }
     val isExpiryValid = expiryDate.matches(Regex("^(0[1-9]|1[0-2])/\\d{2}$"))
@@ -88,6 +89,7 @@ fun PaymentScreen(movieTitle: String, showTime: String, selectedSeats: List<Stri
 
             Divider(thickness = 1.dp)
 
+            // Payment Fields (same)
             OutlinedTextField(
                 value = cardHolder,
                 onValueChange = { cardHolder = it },
@@ -131,19 +133,27 @@ fun PaymentScreen(movieTitle: String, showTime: String, selectedSeats: List<Stri
                 )
             }
 
-            if (expiryDate.isNotEmpty() && !isExpiryValid) {
-                Text("Format should be MM/YY", color = Color.Red, fontSize = 12.sp)
-            }
-            if (cvv.isNotEmpty() && !isCvvValid) {
-                Text("CVV must be 3 digits", color = Color.Red, fontSize = 12.sp)
-            }
-
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(
                 onClick = {
                     if (isFormValid) {
-                        showDialog = true
+                        // Save booking to Firebase
+                        val bookingData = hashMapOf(
+                            "movieTitle" to movieTitle,
+                            "showTime" to showTime,
+                            "seats" to selectedSeats,
+                            "totalPrice" to totalPrice,
+                            "timestamp" to System.currentTimeMillis()
+                        )
+                        db.collection("bookings")
+                            .add(bookingData)
+                            .addOnSuccessListener {
+                                showDialog = true
+                            }
+                            .addOnFailureListener {
+                                Toast.makeText(context, "Failed to save booking", Toast.LENGTH_SHORT).show()
+                            }
                     } else {
                         Toast.makeText(context, "Please fix form errors", Toast.LENGTH_SHORT).show()
                     }
@@ -169,12 +179,12 @@ fun PaymentScreen(movieTitle: String, showTime: String, selectedSeats: List<Stri
                     ) {
                         Text("Booking Confirmed!", fontSize = 20.sp, color = Color.Black)
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Your ticket will be sent to your registered email.", fontSize = 14.sp)
+                        Text("Your ticket is confirmed!", fontSize = 14.sp)
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = {
                                 showDialog = false
-                                val intent = Intent(context, BookingActivity::class.java)
+                                val intent = Intent(context, BookingHistoryActivity::class.java)
                                 context.startActivity(intent)
                                 if (context is ComponentActivity) {
                                     context.finish()
@@ -182,12 +192,11 @@ fun PaymentScreen(movieTitle: String, showTime: String, selectedSeats: List<Stri
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD4AF37))
                         ) {
-                            Text("OK")
+                            Text("View Bookings")
                         }
                     }
                 }
             }
         }
-
     }
 }
