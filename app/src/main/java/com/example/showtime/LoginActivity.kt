@@ -178,28 +178,7 @@ fun LoginScreen(navController: NavHostController) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = rememberMe,
-                            onCheckedChange = { rememberMe = it }
-                        )
-                        Text("Remember Me")
-                    }
-                    Text(
-                        "Forgot Password?",
-                        fontSize = 14.sp,
-                        color = Color.Red,
-                        textDecoration = TextDecoration.Underline,
-                        modifier = Modifier.clickable {
-                            Toast.makeText(context, "Forgot Password Clicked!", Toast.LENGTH_SHORT).show()
-                        }
-                    )
-                }
+
 
                 Spacer(modifier = Modifier.height(12.dp))
 
