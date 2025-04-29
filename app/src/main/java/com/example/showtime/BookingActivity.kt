@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavHostController
 import com.example.showtime.ui.theme.ShowTimeTheme
 import kotlin.jvm.java
 
@@ -35,17 +36,32 @@ class BookingActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             ShowTimeTheme {
-                BookingScreen()
+                BookingGDPRWrapper()
             }
         }
     }
 }
+
+@Composable
+fun BookingGDPRWrapper() {
+    var accepted by remember { mutableStateOf(false) }
+
+    if (!accepted) {
+        GDPRConsentPopup(onAccept = { accepted = true })
+    } else {
+        BookingScreen()
+    }
+}
+
+
 
 data class Movie(
     val title: String = "",
     val posterUrl: String = "",
     val showTimes: List<String> = emptyList()
 )
+
+
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
