@@ -40,14 +40,22 @@ class LoginActivity : ComponentActivity() {
         setContent {
             ShowTimeTheme {
                 val navController = rememberNavController()
-                LoginScreen(navController)
+                GDPRConsentWrapper(navController)
             }
         }
     }
 }
 
+@Composable
+fun GDPRConsentWrapper(navController: NavHostController) {
+    var accepted by remember { mutableStateOf(false) }
 
-
+    if (!accepted) {
+        GDPRConsentPopup(onAccept = { accepted = true })
+    } else {
+        LoginScreen(navController)
+    }
+}
 
 @Composable
 fun GDPRConsentPopup(onAccept: () -> Unit) {
